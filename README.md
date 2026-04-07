@@ -57,7 +57,6 @@ Project saat ini mencakup:
 
 ## UI Notes
 
-- Visual direction mengikuti reference HTML yang diberikan selama iterasi
 - Layout memakai Flutter widgets, `CustomPainter`, dan komponen Material 3
 - Konten produk, menu, tracking, dan loyalty masih memakai dummy data
 - UI aktif tidak bergantung pada asset image eksternal; visual produk dibuat dengan panel ambient/gradient lokal
@@ -110,11 +109,3 @@ Yang sudah selesai:
 - Home, Store, Grab & Go, dan Track sudah punya screen aktif
 - Terms & Conditions dan Loyalty Registration sudah terhubung
 - widget tests aktif dan lolos
-
-## Next Suggested Improvements
-
-- Tambahkan state management untuk cart, size selection, dan pencarian
-- Ganti dummy data dengan model dan repository terpisah
-- Tambah screen detail produk / detail menu
-- Tambah widget test untuk perpindahan tab yang lebih lengkap
-- Rapikan shared components ke folder `widgets/shared` bila diperlukan
