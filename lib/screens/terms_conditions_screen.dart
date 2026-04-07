@@ -195,13 +195,7 @@ class TermsConditionsScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: ShellBottomBar(
-        onHomeTap: () {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+      bottomNavigationBar: ShellBottomBar(activeTab: null, currentTab: null),
     );
   }
 }

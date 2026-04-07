@@ -40,4 +40,39 @@ void main() {
     expect(find.text('BEGIN THE CEREMONY'), findsOneWidget);
     expect(find.text('THE FAVORITE ORIGIN'), findsOneWidget);
   });
+
+  testWidgets('Track bottom navigation opens track order screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('TRACK'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Track Your Ritual'), findsOneWidget);
+    expect(find.text('#232425'), findsOneWidget);
+    expect(find.text('RITUAL SUMMARY'), findsOneWidget);
+  });
+
+  testWidgets('Store and Grab & Go bottom navigation open their screens', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('STORE'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kohi Store'), findsOneWidget);
+    expect(find.text('Floral Ceremony Roast'), findsOneWidget);
+
+    await tester.tap(find.text('GRAB & GO'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('To Go Menu'), findsOneWidget);
+    expect(find.text('Ceremony Latte'), findsOneWidget);
+  });
 }

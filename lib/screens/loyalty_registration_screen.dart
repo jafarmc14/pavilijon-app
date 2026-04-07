@@ -161,13 +161,7 @@ class _LoyaltyRegistrationScreenState extends State<LoyaltyRegistrationScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: ShellBottomBar(
-        onHomeTap: () {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+      bottomNavigationBar: ShellBottomBar(activeTab: null, currentTab: null),
     );
   }
 }

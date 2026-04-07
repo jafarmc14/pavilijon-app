@@ -1,6 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:pavilijon_app/screens/grab_and_go_screen.dart';
+import 'package:pavilijon_app/screens/home_screen.dart';
+import 'package:pavilijon_app/screens/store_screen.dart';
+import 'package:pavilijon_app/screens/track_order_screen.dart';
+
+enum AppNavTab { home, store, grabAndGo, track }
 
 class HeaderIconButton extends StatelessWidget {
   const HeaderIconButton({super.key, required this.icon, this.onTap});
@@ -116,16 +122,70 @@ class _AmbientLinePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class HomeBottomNavBar extends StatelessWidget {
-  const HomeBottomNavBar({super.key});
+void navigateToTab(
+  BuildContext context,
+  AppNavTab targetTab,
+  AppNavTab? currentTab,
+) {
+  if (currentTab != null && targetTab == currentTab) return;
+
+  final Widget page = switch (targetTab) {
+    AppNavTab.home => const HomeScreen(),
+    AppNavTab.store => const StoreScreen(),
+    AppNavTab.grabAndGo => const GrabAndGoScreen(),
+    AppNavTab.track => const TrackOrderScreen(),
+  };
+
+  Navigator.of(context).pushReplacement(
+    PageRouteBuilder<void>(
+      transitionDuration: const Duration(milliseconds: 180),
+      reverseTransitionDuration: const Duration(milliseconds: 140),
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        return FadeTransition(opacity: curved, child: child);
+      },
+    ),
+  );
+}
+
+class AppBottomNavBar extends StatelessWidget {
+  const AppBottomNavBar({
+    super.key,
+    required this.activeTab,
+    required this.currentTab,
+  });
+
+  final AppNavTab? activeTab;
+  final AppNavTab? currentTab;
 
   @override
   Widget build(BuildContext context) {
     final items = [
-      const _NavItemData(label: 'Home', icon: Icons.home_rounded, active: true),
-      const _NavItemData(label: 'Store', icon: Icons.local_cafe_outlined),
-      const _NavItemData(label: 'Grab & Go', icon: Icons.shopping_bag_outlined),
-      const _NavItemData(label: 'Track', icon: Icons.location_on_outlined),
+      _NavItemData(
+        label: 'Home',
+        icon: Icons.home_rounded,
+        active: activeTab == AppNavTab.home,
+      ),
+      _NavItemData(
+        label: 'Store',
+        icon: Icons.local_cafe_outlined,
+        active: activeTab == AppNavTab.store,
+      ),
+      _NavItemData(
+        label: 'Grab & Go',
+        icon: Icons.shopping_bag_outlined,
+        active: activeTab == AppNavTab.grabAndGo,
+      ),
+      _NavItemData(
+        label: 'Track',
+        icon: Icons.location_on_outlined,
+        active: activeTab == AppNavTab.track,
+      ),
     ];
 
     return SafeArea(
@@ -148,12 +208,7 @@ class HomeBottomNavBar extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: items
-                    .map((item) => _BottomNavItem(data: item))
-                    .toList(),
-              ),
+              child: _BottomNavRow(items: items, currentTab: currentTab),
             ),
           ),
         ),
@@ -163,17 +218,38 @@ class HomeBottomNavBar extends StatelessWidget {
 }
 
 class ShellBottomBar extends StatelessWidget {
-  const ShellBottomBar({super.key, this.onHomeTap});
+  const ShellBottomBar({
+    super.key,
+    required this.activeTab,
+    required this.currentTab,
+  });
 
-  final VoidCallback? onHomeTap;
+  final AppNavTab? activeTab;
+  final AppNavTab? currentTab;
 
   @override
   Widget build(BuildContext context) {
     final items = [
-      const _NavItemData(label: 'Home', icon: Icons.home_rounded),
-      const _NavItemData(label: 'Store', icon: Icons.local_cafe_outlined),
-      const _NavItemData(label: 'Grab & Go', icon: Icons.shopping_bag_outlined),
-      const _NavItemData(label: 'Track', icon: Icons.location_on_outlined),
+      _NavItemData(
+        label: 'Home',
+        icon: Icons.home_rounded,
+        active: activeTab == AppNavTab.home,
+      ),
+      _NavItemData(
+        label: 'Store',
+        icon: Icons.local_cafe_outlined,
+        active: activeTab == AppNavTab.store,
+      ),
+      _NavItemData(
+        label: 'Grab & Go',
+        icon: Icons.shopping_bag_outlined,
+        active: activeTab == AppNavTab.grabAndGo,
+      ),
+      _NavItemData(
+        label: 'Track',
+        icon: Icons.location_on_outlined,
+        active: activeTab == AppNavTab.track,
+      ),
     ];
 
     return SafeArea(
@@ -193,17 +269,49 @@ class ShellBottomBar extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _BottomNavItem(data: items[0], onTap: onHomeTap),
-              _BottomNavItem(data: items[1]),
-              _BottomNavItem(data: items[2]),
-              _BottomNavItem(data: items[3]),
-            ],
-          ),
+          child: _BottomNavRow(items: items, currentTab: currentTab),
         ),
       ),
+    );
+  }
+}
+
+class _BottomNavRow extends StatelessWidget {
+  const _BottomNavRow({required this.items, required this.currentTab});
+
+  final List<_NavItemData> items;
+  final AppNavTab? currentTab;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _BottomNavItem(
+          data: items[0],
+          onTap: () {
+            navigateToTab(context, AppNavTab.home, currentTab);
+          },
+        ),
+        _BottomNavItem(
+          data: items[1],
+          onTap: () {
+            navigateToTab(context, AppNavTab.store, currentTab);
+          },
+        ),
+        _BottomNavItem(
+          data: items[2],
+          onTap: () {
+            navigateToTab(context, AppNavTab.grabAndGo, currentTab);
+          },
+        ),
+        _BottomNavItem(
+          data: items[3],
+          onTap: () {
+            navigateToTab(context, AppNavTab.track, currentTab);
+          },
+        ),
+      ],
     );
   }
 }
