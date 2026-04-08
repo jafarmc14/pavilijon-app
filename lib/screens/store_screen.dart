@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:pavilijon_app/screens/screen_components.dart';
+import 'package:pavilijon_app/screens/store_cart_screen.dart';
 import 'package:pavilijon_app/widgets/store/store_widgets.dart';
 
 class StoreScreen extends StatelessWidget {
@@ -88,8 +89,7 @@ class StoreScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
-                      const HeaderIconButton(icon: Icons.menu_rounded),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 52),
                       Expanded(
                         child: Text(
                           'THE SILENT CEREMONY',
@@ -102,8 +102,7 @@ class StoreScreen extends StatelessWidget {
                               ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      const HeaderIconButton(icon: Icons.search_rounded),
+                      const SizedBox(width: 52),
                     ],
                   ),
                 ),
@@ -129,9 +128,30 @@ class StoreScreen extends StatelessWidget {
             left: 20,
             right: 20,
             bottom: 104,
-            child: const StoreFloatingCart(
+            child: StoreFloatingCart(
               itemCount: 2,
               totalAmount: '\$283.00',
+              onReviewOrderTap: () {
+                Navigator.of(context).push(
+                  PageRouteBuilder<void>(
+                    transitionDuration: const Duration(milliseconds: 180),
+                    reverseTransitionDuration: const Duration(
+                      milliseconds: 140,
+                    ),
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const StoreCartScreen(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                          final curved = CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                            reverseCurve: Curves.easeInCubic,
+                          );
+                          return FadeTransition(opacity: curved, child: child);
+                        },
+                  ),
+                );
+              },
             ),
           ),
         ],

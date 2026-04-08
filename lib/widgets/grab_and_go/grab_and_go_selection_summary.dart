@@ -7,10 +7,12 @@ class GrabAndGoSelectionSummary extends StatelessWidget {
     super.key,
     required this.itemCount,
     required this.totalAmount,
+    required this.onCheckoutTap,
   });
 
   final int itemCount;
   final String totalAmount;
+  final VoidCallback onCheckoutTap;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +64,7 @@ class GrabAndGoSelectionSummary extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: () {},
+                  onPressed: onCheckoutTap,
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF815534),
                     foregroundColor: const Color(0xFFFFF7F4),

@@ -5,10 +5,12 @@ class GrabAndGoMenuCard extends StatelessWidget {
   const GrabAndGoMenuCard({
     super.key,
     required this.data,
+    required this.onQuickAddTap,
     this.reverseLayout = false,
   });
 
   final GrabAndGoItemData data;
+  final VoidCallback onQuickAddTap;
   final bool reverseLayout;
 
   @override
@@ -96,29 +98,11 @@ class GrabAndGoMenuCard extends StatelessWidget {
               color: const Color(0xFF5A6061),
             ),
           ),
-          const SizedBox(height: 22),
-          Text(
-            'VESSEL SIZE',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontSize: 10,
-              letterSpacing: 2.0,
-              color: const Color(0xFFADB3B4),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: data.sizeOptions
-                .map((option) => _SizeChip(data: option))
-                .toList(),
-          ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () {},
+              onPressed: onQuickAddTap,
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF815534),
                 foregroundColor: const Color(0xFFFFF7F4),
@@ -197,40 +181,6 @@ class GrabAndGoMenuCard extends StatelessWidget {
   }
 }
 
-class _SizeChip extends StatelessWidget {
-  const _SizeChip({required this.data});
-
-  final GrabAndGoSizeOption data;
-
-  @override
-  Widget build(BuildContext context) {
-    final isSelected = data.selected;
-
-    return Container(
-      padding: data.compact
-          ? const EdgeInsets.symmetric(horizontal: 18, vertical: 12)
-          : const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF815534) : Colors.transparent,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: isSelected ? const Color(0xFF815534) : const Color(0xFFADB3B4),
-          width: isSelected ? 2 : 1,
-        ),
-      ),
-      child: Text(
-        data.label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          fontSize: 11,
-          letterSpacing: 0,
-          color: isSelected ? const Color(0xFFFFF7F4) : const Color(0xFF5A6061),
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
 class GrabAndGoItemData {
   const GrabAndGoItemData({
     required this.title,
@@ -238,8 +188,8 @@ class GrabAndGoItemData {
     required this.description,
     required this.icon,
     required this.palette,
-    required this.sizeOptions,
     required this.surfaceColor,
+    required this.variantTotalPrice,
     this.badge,
     this.imageAlignment = const Alignment(0.6, -0.08),
   });
@@ -249,20 +199,8 @@ class GrabAndGoItemData {
   final String description;
   final IconData icon;
   final List<Color> palette;
-  final List<GrabAndGoSizeOption> sizeOptions;
   final Color surfaceColor;
+  final String variantTotalPrice;
   final String? badge;
   final Alignment imageAlignment;
-}
-
-class GrabAndGoSizeOption {
-  const GrabAndGoSizeOption({
-    required this.label,
-    this.selected = false,
-    this.compact = false,
-  });
-
-  final String label;
-  final bool selected;
-  final bool compact;
 }

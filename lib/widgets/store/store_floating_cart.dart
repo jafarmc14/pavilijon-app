@@ -7,10 +7,12 @@ class StoreFloatingCart extends StatelessWidget {
     super.key,
     required this.itemCount,
     required this.totalAmount,
+    required this.onReviewOrderTap,
   });
 
   final int itemCount;
   final String totalAmount;
+  final VoidCallback onReviewOrderTap;
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +104,7 @@ class StoreFloatingCart extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
-                  onPressed: () {},
+                  onPressed: onReviewOrderTap,
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF815534),
                     foregroundColor: const Color(0xFFFFF7F4),

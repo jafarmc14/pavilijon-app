@@ -46,8 +46,7 @@ class _LoyaltyRegistrationScreenState extends State<LoyaltyRegistrationScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  const HeaderIconButton(icon: Icons.menu_rounded),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 52),
                   Expanded(
                     child: Text(
                       'THE SILENT CEREMONY',

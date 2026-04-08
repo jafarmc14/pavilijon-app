@@ -74,5 +74,169 @@ void main() {
 
     expect(find.text('To Go Menu'), findsOneWidget);
     expect(find.text('Ceremony Latte'), findsOneWidget);
+    expect(find.text('VESSEL SIZE'), findsNothing);
+  });
+
+  testWidgets('Quick Add on Grab & Go opens variant picker screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('GRAB & GO'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('QUICK ADD').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('KURASU TOKYO'), findsOneWidget);
+    expect(find.text('SIGNATURE BREW'), findsOneWidget);
+    expect(find.text('Small'), findsOneWidget);
+    expect(find.text('Medium'), findsOneWidget);
+    expect(find.text('Big'), findsOneWidget);
+    expect(find.text('ADD TO CART'), findsOneWidget);
+  });
+
+  testWidgets('Checkout on Grab & Go opens To-Go Cart screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('GRAB & GO'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('CHECKOUT'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('To-Go Cart'), findsOneWidget);
+    expect(find.text('Ceremony Latte'), findsOneWidget);
+    expect(find.text('Cold Brew Reserve'), findsOneWidget);
+    expect(find.text('ENHANCE THE RITUAL'), findsNothing);
+  });
+
+  testWidgets('Proceed to checkout on Grab & Go cart opens checkout screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('GRAB & GO'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('CHECKOUT'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('PROCEED TO CHECKOUT'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PROCEED TO CHECKOUT'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Personal Ritual'), findsOneWidget);
+    expect(find.text('LOYALTY VALIDATION'), findsOneWidget);
+    expect(find.text('FINALIZE RITUAL'), findsOneWidget);
+  });
+
+  testWidgets('Finalize ritual on Grab & Go checkout opens payment success', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('GRAB & GO'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('CHECKOUT'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('PROCEED TO CHECKOUT'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PROCEED TO CHECKOUT'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('FINALIZE RITUAL'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('FINALIZE RITUAL'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Your Ritual is Brewing'), findsOneWidget);
+    expect(find.text('#042'), findsOneWidget);
+    expect(find.text('8-10'), findsNothing);
+    expect(find.text('TRACK IN REAL-TIME'), findsNothing);
+    expect(find.text('RETURN TO HOME'), findsNothing);
+  });
+
+  testWidgets('Review Order on Store opens Store Cart screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('STORE'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('REVIEW ORDER'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('THE CART\nRITUAL'), findsOneWidget);
+    expect(find.text('Floral Ceremony Roast'), findsOneWidget);
+    expect(find.text('BEGIN CHECKOUT RITUAL'), findsOneWidget);
+  });
+
+  testWidgets('Begin Checkout Ritual opens Store Checkout screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('STORE'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('REVIEW ORDER'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('BEGIN CHECKOUT RITUAL'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('BEGIN CHECKOUT RITUAL'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Personal Details'), findsOneWidget);
+    expect(find.text('PAY NOW'), findsOneWidget);
+    expect(find.text('Payment Method'), findsNothing);
+  });
+
+  testWidgets('Pay Now opens Store Payment Success screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PavilijonApp());
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('STORE'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('REVIEW ORDER'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('BEGIN CHECKOUT RITUAL'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('BEGIN CHECKOUT RITUAL'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('PAY NOW'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PAY NOW'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('The Ritual Awaits'), findsOneWidget);
+    expect(find.text('#SR-2024'), findsOneWidget);
+    expect(find.text('RETURN TO HOME'), findsNothing);
+    expect(find.text('VIEW ORDER TRACKING'), findsNothing);
   });
 }
