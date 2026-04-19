@@ -1,8 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:pavilijon_app/config/api_config.dart';
 import 'package:pavilijon_app/screens/screen_components.dart';
+
+typedef FavoriteProductsLoader = Future<List<String>> Function();
 
 class LoyaltyRegistrationScreen extends StatefulWidget {
   const LoyaltyRegistrationScreen({super.key});
+
+  static FavoriteProductsLoader? favoriteProductsLoaderOverride;
 
   @override
   State<LoyaltyRegistrationScreen> createState() =>
@@ -10,21 +18,132 @@ class LoyaltyRegistrationScreen extends StatefulWidget {
 }
 
 class _LoyaltyRegistrationScreenState extends State<LoyaltyRegistrationScreen> {
+  static const _fallbackOriginOptions = [
+    'Americano',
+    'Cappuccino',
+    'Espresso',
+    'Flat White',
+    'Latte',
+  ];
+  static final _favoriteProductsUri = Uri.parse(favoriteProductsEndpoint);
+
   final List<String> _genderOptions = const [
     'Prefer not to say',
     'Non-binary',
     'Female',
     'Male',
   ];
-  final List<String> _originOptions = const [
-    'Kyoto Dark Roast',
-    'Ethiopian Yirgacheffe',
-    'Cold Brew Concentrate',
-    'Signature Matcha Ritual',
-  ];
 
   String _selectedGender = 'Prefer not to say';
-  String _selectedOrigin = 'Kyoto Dark Roast';
+  List<String> _originOptions = _fallbackOriginOptions;
+  String? _selectedOrigin = _fallbackOriginOptions.first;
+  bool _isLoadingOriginOptions = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteProducts();
+  }
+
+  Future<void> _loadFavoriteProducts() async {
+    final overrideLoader =
+        LoyaltyRegistrationScreen.favoriteProductsLoaderOverride;
+    var options = <String>[];
+
+    if (overrideLoader != null) {
+      options = await overrideLoader();
+    } else {
+      options = await _fetchFavoriteProducts();
+    }
+
+    if (!mounted) return;
+
+    final resolvedOptions = options.isNotEmpty
+        ? options
+        : _fallbackOriginOptions;
+
+    setState(() {
+      _originOptions = resolvedOptions;
+      _selectedOrigin = resolvedOptions.contains(_selectedOrigin)
+          ? _selectedOrigin
+          : (resolvedOptions.isNotEmpty ? resolvedOptions.first : null);
+      _isLoadingOriginOptions = false;
+    });
+  }
+
+  Future<List<String>> _fetchFavoriteProducts() async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 6);
+
+    try {
+      debugPrint(
+        '[Loyalty] Requesting favorite products from $_favoriteProductsUri',
+      );
+
+      final request = await client.getUrl(_favoriteProductsUri);
+      request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+
+      final response = await request.close();
+      final responseBody = await response.transform(utf8.decoder).join();
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        debugPrint(
+          '[Loyalty] Favorite products request failed with status '
+          '${response.statusCode}. Body: $responseBody',
+        );
+        return const [];
+      }
+
+      final decoded = jsonDecode(responseBody);
+      if (decoded is! Map<String, dynamic>) {
+        debugPrint(
+          '[Loyalty] Favorite products payload is invalid: '
+          '${decoded.runtimeType}',
+        );
+        return const [];
+      }
+
+      final options = decoded['options'];
+      if (options is! List) {
+        debugPrint('[Loyalty] Favorite products options are missing.');
+        return const [];
+      }
+
+      final values = options
+          .whereType<Map<String, dynamic>>()
+          .map((option) => (option['value'] as String? ?? '').trim())
+          .where((value) => value.isNotEmpty)
+          .toList(growable: false);
+
+      debugPrint(
+        '[Loyalty] Favorite products loaded: ${values.length} options',
+      );
+      return values;
+    } on SocketException catch (error, stackTrace) {
+      debugPrint('[Loyalty] SocketException while loading favorites: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return const [];
+    } on HttpException catch (error, stackTrace) {
+      debugPrint('[Loyalty] HttpException while loading favorites: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return const [];
+    } on FormatException catch (error, stackTrace) {
+      debugPrint('[Loyalty] FormatException while parsing favorites: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return const [];
+    } on HandshakeException catch (error, stackTrace) {
+      debugPrint(
+        '[Loyalty] HandshakeException while loading favorites: $error',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return const [];
+    } catch (error, stackTrace) {
+      debugPrint('[Loyalty] Unexpected error while loading favorites: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return const [];
+    } finally {
+      client.close(force: true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +260,7 @@ class _LoyaltyRegistrationScreenState extends State<LoyaltyRegistrationScreen> {
                       child: _LoyaltyRegistrationForm(
                         selectedGender: _selectedGender,
                         selectedOrigin: _selectedOrigin,
+                        isLoadingOriginOptions: _isLoadingOriginOptions,
                         genderOptions: _genderOptions,
                         originOptions: _originOptions,
                         onGenderChanged: (value) {
@@ -169,6 +289,7 @@ class _LoyaltyRegistrationForm extends StatelessWidget {
   const _LoyaltyRegistrationForm({
     required this.selectedGender,
     required this.selectedOrigin,
+    required this.isLoadingOriginOptions,
     required this.genderOptions,
     required this.originOptions,
     required this.onGenderChanged,
@@ -176,7 +297,8 @@ class _LoyaltyRegistrationForm extends StatelessWidget {
   });
 
   final String selectedGender;
-  final String selectedOrigin;
+  final String? selectedOrigin;
+  final bool isLoadingOriginOptions;
   final List<String> genderOptions;
   final List<String> originOptions;
   final ValueChanged<String?> onGenderChanged;
@@ -191,101 +313,63 @@ class _LoyaltyRegistrationForm extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth > 560;
-
-              final firstRow = [
-                Expanded(
-                  child: _LoyaltyField(
-                    label: 'Full Name',
-                    child: TextFormField(
-                      initialValue: 'ALEX MERCER',
-                      decoration: _loyaltyInputDecoration('ALEX MERCER'),
+          _LoyaltyField(
+            label: 'Full Name',
+            child: TextFormField(
+              initialValue: 'ALEX MERCER',
+              decoration: _loyaltyInputDecoration('ALEX MERCER'),
+            ),
+          ),
+          const SizedBox(height: 18),
+          _LoyaltyField(
+            label: 'Email Address',
+            child: TextFormField(
+              initialValue: 'ritual@silent.com',
+              decoration: _loyaltyInputDecoration('ritual@silent.com'),
+            ),
+          ),
+          const SizedBox(height: 18),
+          _LoyaltyField(
+            label: 'Date of Birth',
+            child: TextFormField(
+              initialValue: '1994-10-24',
+              decoration: _loyaltyInputDecoration('1994-10-24'),
+            ),
+          ),
+          const SizedBox(height: 18),
+          _LoyaltyField(
+            label: 'Gender Identification',
+            child: DropdownButtonFormField<String>(
+              isExpanded: true,
+              value: selectedGender,
+              decoration: _loyaltyInputDecoration(''),
+              items: genderOptions
+                  .map(
+                    (option) => DropdownMenuItem<String>(
+                      value: option,
+                      child: Text(option),
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: _LoyaltyField(
-                    label: 'Email Address',
-                    child: TextFormField(
-                      initialValue: 'ritual@silent.com',
-                      decoration: _loyaltyInputDecoration('ritual@silent.com'),
-                    ),
-                  ),
-                ),
-              ];
-
-              final secondRow = [
-                Expanded(
-                  child: _LoyaltyField(
-                    label: 'Date of Birth',
-                    child: TextFormField(
-                      initialValue: '1994-10-24',
-                      decoration: _loyaltyInputDecoration('1994-10-24'),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: _LoyaltyField(
-                    label: 'Gender Identification',
-                    child: DropdownButtonFormField<String>(
-                      value: selectedGender,
-                      decoration: _loyaltyInputDecoration(''),
-                      items: genderOptions
-                          .map(
-                            (option) => DropdownMenuItem<String>(
-                              value: option,
-                              child: Text(option),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: onGenderChanged,
-                    ),
-                  ),
-                ),
-              ];
-
-              return Column(
-                children: [
-                  if (isWide)
-                    Row(
-                      children: [
-                        firstRow[0],
-                        const SizedBox(width: 18),
-                        firstRow[1],
-                      ],
-                    )
-                  else ...[
-                    firstRow[0],
-                    const SizedBox(height: 18),
-                    firstRow[1],
-                  ],
-                  const SizedBox(height: 18),
-                  if (isWide)
-                    Row(
-                      children: [
-                        secondRow[0],
-                        const SizedBox(width: 18),
-                        secondRow[1],
-                      ],
-                    )
-                  else ...[
-                    secondRow[0],
-                    const SizedBox(height: 18),
-                    secondRow[1],
-                  ],
-                ],
-              );
-            },
+                  )
+                  .toList(),
+              onChanged: onGenderChanged,
+            ),
           ),
           const SizedBox(height: 18),
           _LoyaltyField(
             label: 'The Favorite Origin',
             child: DropdownButtonFormField<String>(
-              value: selectedOrigin,
+              isExpanded: true,
+              value: originOptions.contains(selectedOrigin)
+                  ? selectedOrigin
+                  : null,
               decoration: _loyaltyInputDecoration(''),
+              hint: Text(
+                isLoadingOriginOptions
+                    ? 'Loading favorites...'
+                    : 'Select your favorite',
+              ),
               items: originOptions
                   .map(
                     (option) => DropdownMenuItem<String>(
@@ -294,7 +378,7 @@ class _LoyaltyRegistrationForm extends StatelessWidget {
                     ),
                   )
                   .toList(),
-              onChanged: onOriginChanged,
+              onChanged: isLoadingOriginOptions ? null : onOriginChanged,
             ),
           ),
           const SizedBox(height: 28),

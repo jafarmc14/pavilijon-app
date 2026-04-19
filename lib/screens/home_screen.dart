@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:pavilijon_app/data/homepage_content.dart';
 import 'package:pavilijon_app/screens/loyalty_registration_screen.dart';
 import 'package:pavilijon_app/screens/screen_components.dart';
 import 'package:pavilijon_app/screens/terms_conditions_screen.dart';
@@ -11,29 +12,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final featuredBrews = [
-      const FeaturedBrewData(
-        title: 'Onyx Cold Brew',
-        description: 'Notes of dark chocolate and smoke',
-        price: '\$7.50',
-        icon: Icons.dark_mode_outlined,
-        palette: [Color(0xFF30211A), Color(0xFF6D4C39)],
-      ),
-      const FeaturedBrewData(
-        title: 'Kyoto Matcha Ritual',
-        description: 'Stone-ground, ceremonial grade',
-        price: '\$9.00',
-        icon: Icons.spa_outlined,
-        palette: [Color(0xFF4C6B3C), Color(0xFF8EA86A)],
-      ),
-      const FeaturedBrewData(
-        title: 'Cloud Foam Latte',
-        description: 'Oat milk, vanilla bean infusion',
-        price: '\$6.50',
-        icon: Icons.cloud_outlined,
-        palette: [Color(0xFF786555), Color(0xFFD8C4AF)],
-      ),
-    ];
+    final homepageContent = HomepageContentStore.instance.content;
+    final signatureMenu = homepageContent?.signatureMenu ?? const [];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
@@ -96,28 +76,48 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const HomeHeroBanner(),
+                  HomeHeroBanner(
+                    imageUrls: homepageContent?.heroImages ?? const [],
+                  ),
                   const SizedBox(height: 44),
                   const HomeSectionHeading(
                     eyebrow: 'Featured Brews',
                     title: 'The Signature Collection',
-                    actionLabel: 'View All',
                   ),
                   const SizedBox(height: 18),
-                  SizedBox(
-                    height: 392,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: featuredBrews.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 20),
-                      itemBuilder: (context, index) {
-                        return FeaturedBrewCard(data: featuredBrews[index]);
-                      },
+                  if (signatureMenu.isEmpty)
+                    Container(
+                      height: 220,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2F4F4),
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      child: Text(
+                        'Signature collection is being prepared.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF5A6061),
+                        ),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: 392,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: signatureMenu.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 20),
+                        itemBuilder: (context, index) {
+                          return FeaturedBrewCard(data: signatureMenu[index]);
+                        },
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 52),
-                  const HomeStorySection(),
+                  HomeStorySection(
+                    imageUrls: homepageContent?.storyImages ?? const [],
+                  ),
                   const SizedBox(height: 40),
                   HomeLoyaltyBanner(
                     onBecomeMemberTap: () {

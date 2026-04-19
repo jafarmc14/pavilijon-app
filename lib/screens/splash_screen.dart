@@ -1,11 +1,19 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:pavilijon_app/config/api_config.dart';
 import 'package:flutter/material.dart';
+import 'package:pavilijon_app/data/homepage_content.dart';
 import 'package:pavilijon_app/screens/home_screen.dart';
+
+typedef HomepageLoader = Future<bool> Function();
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  static HomepageLoader? homepageLoaderOverride;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -14,6 +22,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   static const _minimumSplashDuration = Duration(seconds: 3);
+  static final _homepageUri = Uri.parse(homepageEndpoint);
 
   late final AnimationController _steamController;
   late final AnimationController _exitController;
@@ -36,7 +45,11 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _startInitialization() async {
     final stopwatch = Stopwatch()..start();
 
-    await _prepareInitialData();
+    final isHomepageReady = await _prepareInitialData();
+    if (!isHomepageReady) {
+      return;
+    }
+
     final isConfigurationValid = await _checkInitialConfiguration();
 
     final remainingDuration = _minimumSplashDuration - stopwatch.elapsed;
@@ -63,9 +76,85 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Future<void> _prepareInitialData() async {
-    _setStatusLabel('LOADING INITIAL DATA...');
-    await Future.delayed(const Duration(milliseconds: 1400));
+  Future<bool> _prepareInitialData() async {
+    _setStatusLabel('FETCHING HOMEPAGE DATA...');
+    HomepageContentStore.instance.clear();
+
+    final overrideLoader = SplashScreen.homepageLoaderOverride;
+    if (overrideLoader != null) {
+      final isReady = await overrideLoader();
+      _setStatusLabel(
+        isReady ? 'HOMEPAGE DATA RECEIVED.' : 'FAILED TO LOAD HOMEPAGE DATA.',
+      );
+      return isReady;
+    }
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 6);
+
+    try {
+      debugPrint('[Splash] Requesting homepage data from $_homepageUri');
+
+      final request = await client.getUrl(_homepageUri);
+      request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+
+      final response = await request.close();
+      final responseBody = await response.transform(utf8.decoder).join();
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint(
+          '[Splash] Homepage API success: ${response.statusCode} '
+          '(${responseBody.length} chars)',
+        );
+
+        final decoded = jsonDecode(responseBody);
+        if (decoded is! Map<String, dynamic>) {
+          debugPrint(
+            '[Splash] Homepage API returned a non-object JSON payload: '
+            '${decoded.runtimeType}',
+          );
+          _setStatusLabel('HOMEPAGE API RESPONSE IS INVALID.');
+          return false;
+        }
+
+        HomepageContentStore.instance.replaceFromJson(decoded);
+        _setStatusLabel('HOMEPAGE DATA RECEIVED.');
+        return true;
+      }
+
+      debugPrint(
+        '[Splash] Homepage API request failed with status '
+        '${response.statusCode}. Body: $responseBody',
+      );
+      _setStatusLabel('FAILED TO LOAD HOMEPAGE DATA.');
+      return false;
+    } on SocketException catch (error, stackTrace) {
+      debugPrint('[Splash] SocketException while loading homepage: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _setStatusLabel('HOMEPAGE API IS UNREACHABLE.');
+      return false;
+    } on FormatException catch (error, stackTrace) {
+      debugPrint('[Splash] FormatException while parsing homepage: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _setStatusLabel('HOMEPAGE API RESPONSE IS INVALID.');
+      return false;
+    } on HttpException catch (error, stackTrace) {
+      debugPrint('[Splash] HttpException while loading homepage: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _setStatusLabel('HOMEPAGE API RESPONSE IS INVALID.');
+      return false;
+    } on HandshakeException catch (error, stackTrace) {
+      debugPrint('[Splash] HandshakeException while loading homepage: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _setStatusLabel('SECURE CONNECTION TO API FAILED.');
+      return false;
+    } catch (error, stackTrace) {
+      debugPrint('[Splash] Unexpected error while loading homepage: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _setStatusLabel('UNEXPECTED ERROR WHILE LOADING HOMEPAGE.');
+      return false;
+    } finally {
+      client.close(force: true);
+    }
   }
 
   Future<bool> _checkInitialConfiguration() async {

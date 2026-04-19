@@ -10,35 +10,41 @@ class TermsConditionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sections = [
       const _TermsSectionData(
-        title: '1. Acceptance of Terms',
-        body:
-            'By entering the digital space of The Silent Ceremony, you acknowledge that you have read, understood, and agreed to be bound by these terms. This is a ritual of mutual respect and precision. If you do not agree to these terms, we invite you to cease your journey through our platform immediately.',
-        quote:
-            'Precision is the foundation of the ritual. Every interaction is measured, every drop is counted.',
-      ),
-      const _TermsSectionData(
-        title: '2. User Eligibility',
-        body:
-            'Membership within our community is reserved for individuals who have reached the age of majority in their jurisdiction. You must provide accurate, truthful information when creating your profile. We reserve the right to suspend any account that fails to maintain the integrity of the ritual.',
+        title: '1. Company Information',
+        body: 'This store is operated by:',
         bullets: [
-          'Global residency compliance is required for physical deliveries.',
-          'Single-user authentication protocols must be observed.',
+          'Company Name: PAVILIJON FOODSKA GLOBAL Sp. z o.o.',
+          'NIP: 5253076786',
+          'REGON: 54384483200000',
+          'Address: ul. ALEJA "SOLIDARNOSCI" 60B/U3, 00-240 WARSZAWA, Poland',
+          'Email: admin@pavilijoncoffee.com',
+          'Phone: +48 452 211 208',
         ],
       ),
       const _TermsSectionData(
-        title: '3. Ritual Services',
+        title: '2. General Provisions',
         body:
-            'Our services encompass the curation, roasted preparation, and delivery of premium beans. Each Brew Card displayed represents a unique temporal offering. Prices are subject to change based on seasonal harvest availability and the technical precision required for each batch.',
+            'These Terms & Conditions define the rules for making purchases in the Pavilijon Coffee online store. By placing an order, the Customer confirms that they have read and agree to these Terms.',
       ),
       const _TermsSectionData(
-        title: '4. Intellectual Property',
+        title: '3. Orders and Payment',
         body:
-            'All visual aesthetics, typography pairings, and the proprietary Silent Ceremony brewing techniques are protected. You may not reproduce, replicate, or mirror the editorial layout of this interface for any commercial purpose without explicit written consent.',
+            'All prices listed on the website are gross prices in Polish Zloty (PLN) and include applicable VAT. Payments for online orders are processed securely via the PayU payment gateway. Orders are fulfilled once payment is successfully received.',
       ),
       const _TermsSectionData(
-        title: '5. Limitation of Liability',
+        title: '4. Delivery and Collection',
         body:
-            'We strive for perfection, yet acknowledge the variables of the natural world. The Silent Ceremony shall not be liable for any indirect, incidental, or consequential damages resulting from your use or inability to use our services.',
+            'Products are prepared according to the selected collection or delivery method. Customers are responsible for providing accurate contact and delivery information.',
+      ),
+      const _TermsSectionData(
+        title: '5. Returns and Complaints',
+        body:
+            'Due to the perishable nature of food and beverage goods, rights to return standard products may be limited. If an item is defective or an error has occurred, please contact us immediately via the email or phone number provided above.',
+      ),
+      const _TermsSectionData(
+        title: '6. Privacy Policy',
+        body:
+            'The Seller processes the Customer\'s personal data solely for the purpose of fulfilling the contract (order). Detailed information is available in our Privacy Policy.',
       ),
     ];
 
@@ -86,7 +92,7 @@ class TermsConditionsScreen extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Terms & Conditions',
+                      'Terms & Conditions (Regulamin)',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.4,
@@ -113,7 +119,7 @@ class TermsConditionsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 14),
                       Text(
-                        'The Terms of\nOur Silent Ceremony.',
+                        'Terms & Conditions\n(Regulamin)',
                         style: Theme.of(context).textTheme.displaySmall
                             ?.copyWith(
                               fontWeight: FontWeight.w900,
@@ -123,37 +129,14 @@ class TermsConditionsScreen extends StatelessWidget {
                             ),
                       ),
                       const SizedBox(height: 18),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 10,
-                        runSpacing: 6,
-                        children: [
-                          Text(
-                            'Last Updated: OCTOBER 24, 2023',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.2,
-                                  color: const Color(0xFF5F5E5E),
-                                ),
-                          ),
-                          Container(
-                            width: 4,
-                            height: 4,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFADB3B4),
-                              shape: BoxShape.circle,
+                      Text(
+                        'Last Updated: March 2026',
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                              color: const Color(0xFF5F5E5E),
                             ),
-                          ),
-                          Text(
-                            'v 2.1.0',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF5F5E5E),
-                                ),
-                          ),
-                        ],
                       ),
                       const SizedBox(height: 44),
                       for (final section in sections) ...[
@@ -226,25 +209,6 @@ class _TermsSection extends StatelessWidget {
             height: 1.8,
           ),
         ),
-        if (section.quote != null) ...[
-          const SizedBox(height: 18),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF2F4F4),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '"${section.quote!}"',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-                color: const Color(0xFF5A6061),
-              ),
-            ),
-          ),
-        ],
         if (section.bullets.isNotEmpty) ...[
           const SizedBox(height: 18),
           for (var i = 0; i < section.bullets.length; i++) ...[
@@ -286,12 +250,10 @@ class _TermsSectionData {
   const _TermsSectionData({
     required this.title,
     required this.body,
-    this.quote,
     this.bullets = const [],
   });
 
   final String title;
   final String body;
-  final String? quote;
   final List<String> bullets;
 }

@@ -1,3 +1,4 @@
+export 'editorial_image_carousel.dart';
 export 'featured_brew_card.dart';
 export 'hero_banner.dart';
 export 'location_section.dart';

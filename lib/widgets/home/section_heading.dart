@@ -5,15 +5,17 @@ class HomeSectionHeading extends StatelessWidget {
     super.key,
     required this.eyebrow,
     required this.title,
-    required this.actionLabel,
+    this.actionLabel,
   });
 
   final String eyebrow;
   final String title;
-  final String actionLabel;
+  final String? actionLabel;
 
   @override
   Widget build(BuildContext context) {
+    final hasAction = actionLabel != null && actionLabel!.trim().isNotEmpty;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -42,22 +44,23 @@ class HomeSectionHeading extends StatelessWidget {
             ],
           ),
         ),
-        TextButton(
-          onPressed: () {},
-          style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF2D3435),
-            padding: EdgeInsets.zero,
-          ),
-          child: Text(
-            actionLabel.toUpperCase(),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontSize: 10,
-              letterSpacing: 1.8,
-              decoration: TextDecoration.underline,
-              decorationColor: const Color(0xFFADB3B4),
+        if (hasAction)
+          TextButton(
+            onPressed: () {},
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF2D3435),
+              padding: EdgeInsets.zero,
+            ),
+            child: Text(
+              actionLabel!.toUpperCase(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontSize: 10,
+                letterSpacing: 1.8,
+                decoration: TextDecoration.underline,
+                decorationColor: const Color(0xFFADB3B4),
+              ),
             ),
           ),
-        ),
       ],
     );
   }

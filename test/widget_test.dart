@@ -1,22 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pavilijon_app/data/homepage_content.dart';
 import 'package:pavilijon_app/main.dart';
+import 'package:pavilijon_app/screens/loyalty_registration_screen.dart';
+import 'package:pavilijon_app/screens/splash_screen.dart';
+
+final _mockHomepageContent = <String, dynamic>{
+  'hero': {
+    'images': ['https://pavilijoncoffee.com/uploads/mock-hero.png'],
+  },
+  'story': {
+    'images': ['https://pavilijoncoffee.com/uploads/mock-story.png'],
+  },
+  'signatureMenu': [
+    {
+      'id': 2,
+      'name': 'Americano',
+      'description': 'House signature',
+      'priceGross': 14,
+      'imageUrl': 'https://pavilijoncoffee.com/uploads/mock-americano.png',
+    },
+  ],
+};
 
 void main() {
+  setUp(() {
+    HomepageContentStore.instance.clear();
+    SplashScreen.homepageLoaderOverride = () async {
+      HomepageContentStore.instance.replaceFromJson(_mockHomepageContent);
+      return true;
+    };
+    LoyaltyRegistrationScreen.favoriteProductsLoaderOverride = () async => [
+      'Americano',
+      'Cappuccino',
+      'Latte',
+    ];
+  });
+
+  tearDown(() {
+    HomepageContentStore.instance.clear();
+    SplashScreen.homepageLoaderOverride = null;
+    LoyaltyRegistrationScreen.favoriteProductsLoaderOverride = null;
+  });
+
   testWidgets('Splash screen navigates to home after startup checks', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const PavilijonApp());
 
     expect(find.text('Pavilijon'), findsOneWidget);
-    expect(find.text('LOADING INITIAL DATA...'), findsOneWidget);
+    expect(find.text('FETCHING HOMEPAGE DATA...'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
 
     expect(find.text('THE SILENT CEREMONY'), findsOneWidget);
     expect(find.text('The Morning Ritual'), findsOneWidget);
-    expect(find.text('EXPLORE BEANS'), findsOneWidget);
+    expect(find.text('Americano'), findsOneWidget);
   });
 
   testWidgets('Become a Member opens loyalty registration screen', (
@@ -39,6 +79,7 @@ void main() {
     expect(find.text('MEMBERSHIP INVITATION'), findsOneWidget);
     expect(find.text('BEGIN THE CEREMONY'), findsOneWidget);
     expect(find.text('THE FAVORITE ORIGIN'), findsOneWidget);
+    expect(find.text('Americano'), findsOneWidget);
   });
 
   testWidgets('Track bottom navigation opens track order screen', (

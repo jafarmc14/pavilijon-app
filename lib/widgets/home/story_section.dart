@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pavilijon_app/screens/screen_components.dart';
+import 'package:pavilijon_app/widgets/home/editorial_image_carousel.dart';
 
 class HomeStorySection extends StatelessWidget {
-  const HomeStorySection({super.key});
+  const HomeStorySection({super.key, required this.imageUrls});
+
+  final List<String> imageUrls;
 
   @override
   Widget build(BuildContext context) {
@@ -45,40 +47,23 @@ class HomeStorySection extends StatelessWidget {
                   height: 1.65,
                 ),
               ),
-              const SizedBox(height: 20),
-              TextButton.icon(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF17191A),
-                  padding: EdgeInsets.zero,
-                ),
-                iconAlignment: IconAlignment.end,
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                label: Text(
-                  'READ THE MANIFESTO',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    letterSpacing: 2.0,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
             ],
           );
-          const image = AspectRatio(
+          final image = AspectRatio(
             aspectRatio: 0.96,
-            child: ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(24)),
-              child: AmbientPhotoPanel(
-                palette: [
-                  Color(0xFF47403A),
-                  Color(0xFF74675C),
-                  Color(0xFFC8B9A9),
-                ],
-                icon: Icons.coffee_maker_outlined,
-                iconSize: 92,
-                alignment: Alignment(0.6, -0.08),
-              ),
+            child: EditorialImageCarousel(
+              imageUrls: imageUrls,
+              fallbackPalette: const [
+                Color(0xFF47403A),
+                Color(0xFF74675C),
+                Color(0xFFC8B9A9),
+              ],
+              fallbackIcon: Icons.coffee_maker_outlined,
+              fallbackIconSize: 92,
+              fallbackAlignment: const Alignment(0.6, -0.08),
+              borderRadius: const BorderRadius.all(Radius.circular(24)),
+              showIndicators: true,
+              indicatorAlignment: const Alignment(0.86, 0.9),
             ),
           );
 
@@ -91,7 +76,7 @@ class HomeStorySection extends StatelessWidget {
                     child: textContent,
                   ),
                 ),
-                const Expanded(child: image),
+                Expanded(child: image),
               ],
             );
           }

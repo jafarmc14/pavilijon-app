@@ -1,12 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:pavilijon_app/data/homepage_content.dart';
 import 'package:pavilijon_app/screens/screen_components.dart';
 
 class FeaturedBrewCard extends StatelessWidget {
   const FeaturedBrewCard({super.key, required this.data});
 
-  final FeaturedBrewData data;
+  final HomepageSignatureMenuItem data;
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +22,35 @@ class FeaturedBrewCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  AmbientPhotoPanel(
-                    palette: data.palette,
-                    icon: data.icon,
+                  const AmbientPhotoPanel(
+                    palette: [Color(0xFF30211A), Color(0xFF6D4C39)],
+                    icon: Icons.local_cafe_rounded,
                     iconSize: 82,
-                    alignment: const Alignment(0.65, -0.08),
+                    alignment: Alignment(0.65, -0.08),
+                  ),
+                  if (data.imageUrl.isNotEmpty)
+                    Image.network(
+                      data.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.06),
+                            Colors.black.withValues(alpha: 0.24),
+                          ],
+                          stops: const [0.18, 0.55, 1],
+                        ),
+                      ),
+                    ),
                   ),
                   Positioned(
                     top: 14,
@@ -41,7 +66,7 @@ class FeaturedBrewCard extends StatelessWidget {
                           ),
                           color: Colors.white.withValues(alpha: 0.82),
                           child: Text(
-                            data.price,
+                            data.formattedPriceGross,
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.w800,
@@ -58,7 +83,7 @@ class FeaturedBrewCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            data.title,
+            data.name,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w800,
               color: const Color(0xFF17191A),
@@ -66,7 +91,7 @@ class FeaturedBrewCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            data.description,
+            data.displayDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontSize: 13,
               color: const Color(0xFF5A6061),
@@ -77,20 +102,4 @@ class FeaturedBrewCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class FeaturedBrewData {
-  const FeaturedBrewData({
-    required this.title,
-    required this.description,
-    required this.price,
-    required this.icon,
-    required this.palette,
-  });
-
-  final String title;
-  final String description;
-  final String price;
-  final IconData icon;
-  final List<Color> palette;
 }
